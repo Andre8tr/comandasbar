@@ -1,126 +1,145 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { products } from "@/utils/products";
+import React, { useState } from 'react'
+
+// Inventario actualizado
+const products = [
+  {
+    name: 'Cerveza 🍺',
+    items: [
+      { name: 'Gallo', types: ['Botella', 'Lata'], price: 15 },
+      { name: 'Cabro', types: ['Botella', 'Lata'], price: 20 },
+      { name: 'Corona', types: ['Botella', 'Lata'], price: 15 },
+      { name: 'Gallo', types: ['Litro'], price: 30 },
+      { name: 'Cabro', types: ['Litro'], price: 30 },
+    ],
+  },
+  {
+    name: 'Bebidas Preparadas 🍹',
+    items: [
+      { name: 'Cuba Libre', price: 25 },
+      { name: 'Jagger Fresh', price: 30 },
+      { name: 'Jagger Bomb', price: 35 },
+      { name: 'Whisky', price: 25 },
+      { name: 'Ron', price: 20 },
+      { name: 'Bloody Mary', price: 30 },
+      { name: 'Charro Negro', price: 25 },
+      { name: 'Quetzalteca', price: 20 },
+      { name: 'Preparada', price: 25 },
+    ],
+  },
+  {
+    name: 'Shots 🥃',
+    items: [
+      { name: 'Shot de Tequila', price: 10 },
+      { name: 'Shot de Tequila 2 OZ', price: 20 },
+      { name: 'Shot de Jagger 1 OZ', price: 15 },
+      { name: 'Shot de Jagger 2 OZ', price: 25 },
+    ],
+  },
+  {
+    name: 'Refrescos 🥤',
+    items: [
+      { name: 'Coca-Cola', price: 10 },
+      { name: 'Agua Pura', price: 8 },
+      { name: 'Sprite', price: 10 },
+      { name: '7-Up', price: 10 },
+    ],
+  },
+  {
+    name: 'Comida 🍔',
+    items: [
+      { name: 'Nachos Preparados', price: 30 },
+      { name: 'Papas Fritas', price: 25 },
+      { name: 'Tostadas', price: 20 },
+      { name: 'Panini Jamon', price: 35 },
+      { name: 'Panini Quesos', price: 30 },
+    ],
+  },
+]
+
+type OrderItem = {
+  name: string
+  type?: string
+  price: number
+}
 
 export default function OrderForm() {
-  const [order, setOrder] = useState<string[]>([]);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
-  const [clickedItems, setClickedItems] = useState<Set<string>>(new Set());
+  const [order, setOrder] = useState<OrderItem[]>([])
 
-  const handleAddItem = (item: string) => {
-    setOrder((prev) => [...prev, item]);
-
-    // Efecto visual corto (300ms)
-    setClickedItems((prev) => {
-      const newSet = new Set(prev).add(item);
-      setTimeout(() => {
-        setClickedItems((current) => {
-          const copy = new Set(current);
-          copy.delete(item);
-          return copy;
-        });
-      }, 300);
-      return newSet;
-    });
-  };
+  const handleAddItem = (item: OrderItem) => {
+    setOrder((prev) => [...prev, item])
+  }
 
   const handleRemoveItem = (index: number) => {
-    const itemToRemove = order[index];
-    setOrder((prev) => prev.filter((_, i) => i !== index));
-  };
+    setOrder((prev) => prev.filter((_, i) => i !== index))
+  }
 
-  const toggleCategory = (category: string) => {
-    setOpenCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
-  };
+  const handleClearOrder = () => {
+    setOrder([])
+  }
+
+  const total = order.reduce((sum, item) => sum + item.price, 0)
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-8 mt-8 border border-gray-200">
-      <h1 className="text-3xl font-extrabold mb-6 text-center text-blue-700">
-        🧾 Toma de Comanda
-      </h1>
-
-      {/* Categorías */}
-      {Object.keys(products).map((category) => (
-        <div key={category} className="mb-6 border-b pb-4">
-          <button
-            onClick={() => toggleCategory(category)}
-            className="w-full text-left text-xl font-semibold text-blue-600 hover:underline focus:outline-none"
-          >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-            <span className="float-right">{openCategories[category] ? "▲" : "▼"}</span>
-          </button>
-
-          {openCategories[category] && (
-            <div className="mt-4 flex flex-wrap gap-3">
-              {category === "cervezas"
-                ? products[category].map((product) =>
-                    product.types.map((type) => {
-                      const label = `${product.name} (${type})`;
-                      const isClicked = clickedItems.has(label);
-
-                      return (
-                        <button
-                          key={label}
-                          onClick={() => handleAddItem(label)}
-                          className={`py-2 px-4 rounded-xl text-sm font-medium border transition-all duration-300
-                            ${
-                              isClicked
-                                ? "bg-green-300 border-green-500"
-                                : "bg-blue-100 text-blue-900 hover:bg-blue-200 border-blue-300"
-                            }
-                          `}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })
-                  )
-                : products[category].map((item: string, index: number) => {
-                    const key = `${category}-${index}`;
-                    const isClicked = clickedItems.has(item);
-
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => handleAddItem(item)}
-                        className={`py-2 px-4 rounded-xl text-sm font-medium border transition-all duration-300
-                          ${
-                            isClicked
-                              ? "bg-green-300 border-green-500"
-                              : "bg-blue-100 text-blue-900 hover:bg-blue-200 border-blue-300"
-                          }
-                        `}
-                      >
-                        {item}
-                      </button>
-                    );
-                  })}
-            </div>
-          )}
+    <div className="space-y-6">
+      {products.map((category) => (
+        <div key={category.name} className="bg-white shadow rounded-xl p-4">
+          <h2 className="text-xl font-semibold mb-3 text-blue-700">{category.name}</h2>
+          <div className="flex flex-wrap gap-3">
+            {category.items.map((item, idx) => {
+              if (item.types) {
+                return item.types.map((type) => (
+                  <button
+                    key={`${item.name}-${type}-${idx}`}
+                    onClick={() => handleAddItem({ name: `${item.name} (${type})`, price: item.price })}
+                    className="relative bg-blue-100 hover:bg-blue-200 text-blue-900 font-medium py-2 px-4 rounded-xl transition transform active:scale-95"
+                  >
+                    {item.name} ({type}) - Q{item.price}
+                  </button>
+                ))
+              }
+              return (
+                <button
+                  key={`${item.name}-${idx}`}
+                  onClick={() => handleAddItem({ name: item.name, price: item.price })}
+                  className="relative bg-green-100 hover:bg-green-200 text-green-900 font-medium py-2 px-4 rounded-xl transition transform active:scale-95"
+                >
+                  {item.name} - Q{item.price}
+                </button>
+              )
+            })}
+          </div>
         </div>
       ))}
 
-      {/* Orden actual */}
-      <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">🧺 Orden actual</h2>
-
+      {/* Resumen de la orden */}
+      <div className="bg-white p-4 shadow rounded-xl">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold">Resumen de orden</h2>
+          <button
+            onClick={handleClearOrder}
+            className="text-sm text-red-600 hover:underline"
+          >
+            Limpiar orden
+          </button>
+        </div>
         {order.length === 0 ? (
-          <p className="text-gray-500 italic">No hay productos seleccionados.</p>
+          <p className="text-gray-500">No hay productos seleccionados.</p>
         ) : (
-          <ul className="space-y-2">
-            {order.map((item, index) => (
+          <ul className="space-y-4">
+            {order.map((item, idx) => (
               <li
-                key={index}
-                className="flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-gray-200 shadow-sm"
+                key={idx}
+                className="flex justify-between items-center border-b border-gray-300/50 pb-2"
               >
-                <span className="font-medium text-gray-700">{item}</span>
+                <div>
+                  <span className="block text-sm font-medium">{item.name}</span>
+                  <span className="text-xs text-gray-500">Q{item.price}</span>
+                </div>
                 <button
-                  onClick={() => handleRemoveItem(index)}
-                  className="text-red-600 hover:text-red-800 text-sm font-semibold"
+                  onClick={() => handleRemoveItem(idx)}
+                  className="text-xs text-red-500 hover:underline"
                 >
                   Eliminar
                 </button>
@@ -128,7 +147,10 @@ export default function OrderForm() {
             ))}
           </ul>
         )}
+        <div className="mt-6 text-right font-bold text-lg">
+          Total: Q{total}
+        </div>
       </div>
     </div>
-  );
+  )
 }

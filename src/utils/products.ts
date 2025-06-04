@@ -18,7 +18,6 @@ export const products = {
   refrescos: ["Coca-Cola", "Agua Pura", "Sprite", "7-Up"],
 };
 
-// Nuevo: precios
 export const productPrices: Record<string, number> = {
   "Gallo (Botella)": 15,
   "Gallo (Litro)": 25,
