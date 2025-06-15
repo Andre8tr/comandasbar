@@ -1,156 +1,150 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-
-// Inventario actualizado
-const products = [
-  {
-    name: 'Cerveza 🍺',
-    items: [
-      { name: 'Gallo', types: ['Botella', 'Lata'], price: 15 },
-      { name: 'Cabro', types: ['Botella', 'Lata'], price: 20 },
-      { name: 'Corona', types: ['Botella', 'Lata'], price: 15 },
-      { name: 'Gallo', types: ['Litro'], price: 30 },
-      { name: 'Cabro', types: ['Litro'], price: 30 },
-    ],
-  },
-  {
-    name: 'Bebidas Preparadas 🍹',
-    items: [
-      { name: 'Cuba Libre', price: 25 },
-      { name: 'Jagger Fresh', price: 30 },
-      { name: 'Jagger Bomb', price: 35 },
-      { name: 'Whisky', price: 25 },
-      { name: 'Ron', price: 20 },
-      { name: 'Bloody Mary', price: 30 },
-      { name: 'Charro Negro', price: 25 },
-      { name: 'Quetzalteca', price: 20 },
-      { name: 'Preparada', price: 25 },
-    ],
-  },
-  {
-    name: 'Shots 🥃',
-    items: [
-      { name: 'Shot de Tequila', price: 10 },
-      { name: 'Shot de Tequila 2 OZ', price: 20 },
-      { name: 'Shot de Jagger 1 OZ', price: 15 },
-      { name: 'Shot de Jagger 2 OZ', price: 25 },
-    ],
-  },
-  {
-    name: 'Refrescos 🥤',
-    items: [
-      { name: 'Coca-Cola', price: 10 },
-      { name: 'Agua Pura', price: 8 },
-      { name: 'Sprite', price: 10 },
-      { name: '7-Up', price: 10 },
-    ],
-  },
-  {
-    name: 'Comida 🍔',
-    items: [
-      { name: 'Nachos Preparados', price: 30 },
-      { name: 'Papas Fritas', price: 25 },
-      { name: 'Tostadas', price: 20 },
-      { name: 'Panini Jamon', price: 35 },
-      { name: 'Panini Quesos', price: 30 },
-    ],
-  },
-]
-
-type OrderItem = {
-  name: string
-  type?: string
-  price: number
-}
+import { useParams, useRouter } from 'next/navigation';
+import { useMesaStore } from '@/lib/state';
 
 export default function OrderForm() {
-  const [order, setOrder] = useState<OrderItem[]>([])
+  const { id } = useParams();
+  const router = useRouter();
 
-  const handleAddItem = (item: OrderItem) => {
-    setOrder((prev) => [...prev, item])
-  }
+  const {
+    productos,
+    ordenActual,
+    ordenes,
+    agregarProducto,
+    quitarProducto,
+    incrementar,
+    decrementar,
+    limpiarOrden,
+    enviarOrden,
+    completarMesa,
+  } = useMesaStore();
 
-  const handleRemoveItem = (index: number) => {
-    setOrder((prev) => prev.filter((_, i) => i !== index))
-  }
+  const orden = ordenActual[id as string] || [];
+  const pedidos = ordenes[id as string] || [];
 
-  const handleClearOrder = () => {
-    setOrder([])
-  }
+  const totalOrdenActual = orden.reduce((sum, p) => sum + p.price * p.quantity, 0);
+  const totalMesa = pedidos.reduce((sum, p) => sum + p.total, 0) + totalOrdenActual;
 
-  const total = order.reduce((sum, item) => sum + item.price, 0)
+  const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
+
+  const handleEnviar = () => {
+    enviarOrden(id as string);
+  };
+
+  const handleCompletar = () => {
+    completarMesa(id as string);
+    router.push('/mesas');
+  };
 
   return (
-    <div className="space-y-6">
-      {products.map((category) => (
-        <div key={category.name} className="bg-white shadow rounded-xl p-4">
-          <h2 className="text-xl font-semibold mb-3 text-blue-700">{category.name}</h2>
-          <div className="flex flex-wrap gap-3">
-            {category.items.map((item, idx) => {
-              if (item.types) {
-                return item.types.map((type) => (
-                  <button
-                    key={`${item.name}-${type}-${idx}`}
-                    onClick={() => handleAddItem({ name: `${item.name} (${type})`, price: item.price })}
-                    className="relative bg-blue-100 hover:bg-blue-200 text-blue-900 font-medium py-2 px-4 rounded-xl transition transform active:scale-95"
-                  >
-                    {item.name} ({type}) - Q{item.price}
-                  </button>
-                ))
-              }
-              return (
+    <div className="min-h-screen p-4 bg-gray-50 space-y-6">
+      <h1 className="text-xl font-bold mb-4">Mesa {id}</h1>
+
+      <div className="space-y-6">
+        {productos.map((cat) => (
+          <div key={cat.name}>
+            <h2 className="text-lg font-semibold mb-2">{cat.name}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {cat.items.map((item) => (
                 <button
-                  key={`${item.name}-${idx}`}
-                  onClick={() => handleAddItem({ name: item.name, price: item.price })}
-                  className="relative bg-green-100 hover:bg-green-200 text-green-900 font-medium py-2 px-4 rounded-xl transition transform active:scale-95"
+                  key={item.name}
+                  onClick={() => agregarProducto(id as string, item)}
+                  className="bg-blue-200 text-blue-800 hover:bg-blue-300 px-2 py-2 rounded-xl transition-colors"
                 >
                   {item.name} - Q{item.price}
                 </button>
-              )
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      {/* Resumen de la orden */}
-      <div className="bg-white p-4 shadow rounded-xl">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-bold">Resumen de orden</h2>
-          <button
-            onClick={handleClearOrder}
-            className="text-sm text-red-600 hover:underline"
-          >
-            Limpiar orden
-          </button>
-        </div>
-        {order.length === 0 ? (
-          <p className="text-gray-500">No hay productos seleccionados.</p>
-        ) : (
-          <ul className="space-y-4">
-            {order.map((item, idx) => (
-              <li
-                key={idx}
-                className="flex justify-between items-center border-b border-gray-300/50 pb-2"
-              >
-                <div>
-                  <span className="block text-sm font-medium">{item.name}</span>
-                  <span className="text-xs text-gray-500">Q{item.price}</span>
+      {orden.length > 0 && (
+        <div className="bg-white p-4 rounded-xl shadow space-y-4">
+          <h3 className="text-md font-bold">Orden actual:</h3>
+          <ul className="divide-y divide-gray-200">
+            {orden.map((p, i) => (
+              <li key={i} className="flex justify-between items-center py-2">
+                <span className="w-1/2">{p.name}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => decrementar(id as string, p)}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    -
+                  </button>
+                  <span>{p.quantity}</span>
+                  <button
+                    onClick={() => incrementar(id as string, p)}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => quitarProducto(id as string, p)}
+                    className="ml-2 text-red-600 hover:underline text-sm"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleRemoveItem(idx)}
-                  className="text-xs text-red-500 hover:underline"
-                >
-                  Eliminar
-                </button>
               </li>
             ))}
           </ul>
-        )}
-        <div className="mt-6 text-right font-bold text-lg">
-          Total: Q{total}
+          <div className="text-right font-bold">Total actual: Q{totalOrdenActual}</div>
         </div>
+      )}
+
+      {pedidos.length > 0 && (
+        <div className="bg-white p-4 rounded-xl shadow space-y-4">
+          <h3 className="text-md font-bold">Pedidos anteriores:</h3>
+          {pedidos.map((pedido, idx) => (
+            <div key={idx} className="space-y-2">
+              <h4 className="font-semibold">Pedido {idx + 1}:</h4>
+              <ul className="text-sm text-gray-700">
+                {pedido.items.map((item, i) => (
+                  <li key={i}>
+                    {item.name} x {item.quantity} - Q{item.price * item.quantity}
+                  </li>
+                ))}
+              </ul>
+              <div className="text-right font-semibold">Total: Q{pedido.total}</div>
+            </div>
+          ))}
+
+          <div className="text-right font-bold text-lg border-t border-gray-300 pt-3">
+            Total global pedidos: Q{totalPedidos}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <button
+          onClick={handleEnviar}
+          disabled={orden.length === 0}
+          className={`px-4 py-2 rounded-xl font-semibold ${
+            orden.length === 0
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-green-500 text-white hover:bg-green-600'
+          }`}
+        >
+          Enviar Orden
+        </button>
+
+        <button
+          onClick={() => limpiarOrden(id as string)}
+          className="px-4 py-2 bg-red-200 text-red-700 hover:bg-red-300 rounded-xl font-semibold"
+        >
+          Limpiar Orden
+        </button>
+
+        <button
+          onClick={handleCompletar}
+          className="px-4 py-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-xl font-semibold"
+        >
+          Orden Completada
+        </button>
       </div>
     </div>
-  )
+  );
 }
