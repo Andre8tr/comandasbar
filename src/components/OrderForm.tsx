@@ -24,7 +24,7 @@ export default function OrderForm() {
   const pedidos = ordenes[id as string] || [];
 
   const totalOrdenActual = orden.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  const totalMesa = pedidos.reduce((sum, p) => sum + p.total, 0) + totalOrdenActual;
+  //const totalMesa = pedidos.reduce((sum, p) => sum + p.total, 0) + totalOrdenActual;
 
   const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
 
@@ -66,7 +66,7 @@ export default function OrderForm() {
           <ul className="divide-y divide-gray-200">
             {orden.map((p, i) => (
               <li key={i} className="flex justify-between items-center py-2">
-                <span className="w-1/2">{p.name}</span>
+                <span className="w-1/2">{p.name} - {p.quantity} - Q{(p.price * p.quantity)}</span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => decrementar(id as string, p)}

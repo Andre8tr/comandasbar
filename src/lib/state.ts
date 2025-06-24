@@ -84,9 +84,9 @@ export const useMesaStore = create<MesaState>((set, get) => ({
       items: [
         { name: "Cimarrona", price: 25 },
         { name: "Jugo V8 preparado", price: 25 },
-        { name: "Agua Pura", price: 6 },
-        { name: "Coca-Cola botella", price: 8 },
-        { name: "Sprite botella", price: 8 },
+        { name: "Agua Pura", price: 5 },
+        { name: "Coca-Cola", price: 10 },
+        { name: "Sprite", price: 10 },
       ],
     },
     {
@@ -95,7 +95,7 @@ export const useMesaStore = create<MesaState>((set, get) => ({
         { name: "Nachos Preparados", price: 30 },
         { name: "Papas Fritas", price: 25 },
         { name: "Tostadas", price: 20 },
-        { name: "Pizza Dog", price: 15 },
+        { name: "Pizza Dog", price: 25 },
       ],
     },
   ],
