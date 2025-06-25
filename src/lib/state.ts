@@ -48,7 +48,7 @@ interface MesaState {
 export const useMesaStore = create<MesaState>((set, get) => ({
   mesas: Array.from({ length: 9 }, (_, i) => ({
     id: `${i + 1}`,
-    estado: "rojo",
+    estado: "verde",
   })),
 
   setEstadoMesa: (id, estado) =>
@@ -111,8 +111,12 @@ export const useMesaStore = create<MesaState>((set, get) => ({
           p.name === producto.name ? { ...p, quantity: p.quantity + 1 } : p
         )
       : [...actual, { ...producto, quantity: 1 }];
+
     set((state) => ({
       ordenActual: { ...state.ordenActual, [id]: actualizado },
+      mesas: state.mesas.map((m) =>
+        m.id === id ? { ...m, estado: "rojo" } : m
+      ),
     }));
   },
 
@@ -168,5 +172,7 @@ export const useMesaStore = create<MesaState>((set, get) => ({
       mesas: state.mesas.map((m) =>
         m.id === id ? { ...m, estado: "verde" } : m
       ),
+      ordenActual: { ...state.ordenActual, [id]: [] },
+      ordenes: { ...state.ordenes, [id]: [] },
     })),
 }));
