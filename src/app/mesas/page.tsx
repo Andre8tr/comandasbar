@@ -17,9 +17,9 @@ export default function MesasDashboard() {
           <span className="text-lg font-bold mb-2">Mesa {mesa.id}</span>
           <span
             className={`w-4 h-4 rounded-full ${
-              mesa.estado === 'pendiente'
+              mesa.estado === 'rojo'
                 ? 'bg-red-500'
-                : mesa.estado === 'en proceso'
+                : mesa.estado === 'amarillo'
                 ? 'bg-yellow-400'
                 : 'bg-green-500'
             }`}
