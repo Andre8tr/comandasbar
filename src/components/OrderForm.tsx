@@ -24,8 +24,6 @@ export default function OrderForm() {
   const pedidos = ordenes[id as string] || [];
 
   const totalOrdenActual = orden.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  //const totalMesa = pedidos.reduce((sum, p) => sum + p.total, 0) + totalOrdenActual;
-
   const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
 
   const handleEnviar = () => {
@@ -34,6 +32,10 @@ export default function OrderForm() {
 
   const handleCompletar = () => {
     completarMesa(id as string);
+    router.push('/mesas');
+  };
+
+  const handleVolver = () => {
     router.push('/mesas');
   };
 
@@ -143,6 +145,16 @@ export default function OrderForm() {
           className="px-4 py-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded-xl font-semibold"
         >
           Orden Completada
+        </button>
+      </div>
+
+      {/* Botón adicional para regresar al menú principal */}
+      <div className="pt-6">
+        <button
+          onClick={handleVolver}
+          className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-medium w-full sm:w-auto"
+        >
+          ← Volver al menú de mesas
         </button>
       </div>
     </div>
