@@ -1,6 +1,15 @@
 "use client";
 
 import { create } from "zustand";
+import { db } from "./firebase";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+  deleteField,
+} from "firebase/firestore";
 
 type EstadoMesa = "rojo" | "amarillo" | "verde";
 
@@ -40,9 +49,10 @@ interface MesaState {
   quitarProducto: (id: string, producto: Producto) => void;
   incrementar: (id: string, producto: Producto) => void;
   decrementar: (id: string, producto: Producto) => void;
-  enviarOrden: (id: string) => void;
+  enviarOrden: (id: string) => Promise<void>;
   limpiarOrden: (id: string) => void;
   completarMesa: (id: string) => void;
+  syncMesasWithFirestore: () => void;
 }
 
 export const useMesaStore = create<MesaState>((set, get) => ({
@@ -87,15 +97,26 @@ export const useMesaStore = create<MesaState>((set, get) => ({
         { name: "Agua Pura", price: 5 },
         { name: "Coca-Cola", price: 10 },
         { name: "Sprite", price: 10 },
+        { name: "Mineral", price: 10 },
       ],
     },
     {
       name: "Comida 🍔",
       items: [
         { name: "Nachos Preparados", price: 30 },
-        { name: "Papas Fritas", price: 25 },
+        { name: "Papas Fritas", price: 15 },
+        { name: "Papas Especiales", price: 15 },
         { name: "Tostadas", price: 20 },
         { name: "Pizza Dog", price: 25 },
+        { name: "Alitas 6/u", price: 35 },
+        { name: "Alitas 10/u", price: 50 },
+      ],
+    },
+    {
+      name: "Extras 🚬",
+      items: [
+        { name: "Cigarros 3u", price: 10 },
+        { name: "Vaso quebrado", price: 25 },
       ],
     },
   ],
@@ -111,7 +132,6 @@ export const useMesaStore = create<MesaState>((set, get) => ({
           p.name === producto.name ? { ...p, quantity: p.quantity + 1 } : p
         )
       : [...actual, { ...producto, quantity: 1 }];
-
     set((state) => ({
       ordenActual: { ...state.ordenActual, [id]: actualizado },
       mesas: state.mesas.map((m) =>
@@ -150,29 +170,77 @@ export const useMesaStore = create<MesaState>((set, get) => ({
     }));
   },
 
-  enviarOrden: (id) => {
+  enviarOrden: async (id) => {
     const actual = get().ordenActual[id] || [];
     const total = actual.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const nuevoPedido = { items: actual, total };
     const previos = get().ordenes[id] || [];
+
+    const nuevosPedidos = [...previos, nuevoPedido];
+    const nuevaOrden = { ...get().ordenActual, [id]: [] };
+
     set((state) => ({
-      ordenes: { ...state.ordenes, [id]: [...previos, nuevoPedido] },
-      ordenActual: { ...state.ordenActual, [id]: [] },
+      ordenes: { ...state.ordenes, [id]: nuevosPedidos },
+      ordenActual: nuevaOrden,
       mesas: state.mesas.map((m) =>
         m.id === id ? { ...m, estado: "amarillo" } : m
       ),
     }));
+
+    // Guardar en Firestore
+    const docRef = doc(db, "mesas", id);
+    await setDoc(docRef, {
+      pedidos: nuevosPedidos,
+      ordenActual: [],
+    });
   },
 
   limpiarOrden: (id) =>
-    set((state) => ({ ordenActual: { ...state.ordenActual, [id]: [] } })),
-
-  completarMesa: (id) =>
     set((state) => ({
+      ordenActual: { ...state.ordenActual, [id]: [] },
+    })),
+
+  completarMesa: (id) => {
+    set((state) => ({
+      ordenActual: { ...state.ordenActual, [id]: [] },
+      ordenes: { ...state.ordenes, [id]: [] },
       mesas: state.mesas.map((m) =>
         m.id === id ? { ...m, estado: "verde" } : m
       ),
-      ordenActual: { ...state.ordenActual, [id]: [] },
-      ordenes: { ...state.ordenes, [id]: [] },
-    })),
+    }));
+
+    // Borrar historial en Firestore
+    const docRef = doc(db, "mesas", id);
+    updateDoc(docRef, {
+      pedidos: deleteField(),
+      ordenActual: deleteField(),
+    });
+  },
+
+  syncMesasWithFirestore: () => {
+    for (let i = 1; i <= 9; i++) {
+      const id = `${i}`;
+      const docRef = doc(db, "mesas", id);
+      onSnapshot(docRef, (docSnap) => {
+        const data = docSnap.data();
+        if (data) {
+          const ordenActual = data.ordenActual || [];
+          const pedidos = data.pedidos || [];
+
+          const estado: EstadoMesa =
+            ordenActual.length > 0
+              ? "rojo"
+              : pedidos.length > 0
+              ? "amarillo"
+              : "verde";
+
+          set((state) => ({
+            ordenActual: { ...state.ordenActual, [id]: ordenActual },
+            ordenes: { ...state.ordenes, [id]: pedidos },
+            mesas: state.mesas.map((m) => (m.id === id ? { ...m, estado } : m)),
+          }));
+        }
+      });
+    }
+  },
 }));

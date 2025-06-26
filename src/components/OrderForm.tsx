@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useParams, useRouter } from 'next/navigation';
-import { useMesaStore } from '@/lib/state';
+import { useParams, useRouter } from "next/navigation";
+import { useMesaStore } from "@/lib/state";
 
 export default function OrderForm() {
   const { id } = useParams();
@@ -21,9 +21,14 @@ export default function OrderForm() {
   } = useMesaStore();
 
   const orden = ordenActual[id as string] || [];
-  const pedidos = ordenes[id as string] || [];
+  const pedidos = (ordenes[id as string] || []).filter(
+    (p) => p.items.length > 0 && p.total > 0
+  );
 
-  const totalOrdenActual = orden.reduce((sum, p) => sum + p.price * p.quantity, 0);
+  const totalOrdenActual = orden.reduce(
+    (sum, p) => sum + p.price * p.quantity,
+    0
+  );
   const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
 
   const handleEnviar = () => {
@@ -32,11 +37,11 @@ export default function OrderForm() {
 
   const handleCompletar = () => {
     completarMesa(id as string);
-    router.push('/mesas');
+    router.push("/mesas");
   };
 
   const handleVolver = () => {
-    router.push('/mesas');
+    router.push("/mesas");
   };
 
   return (
@@ -68,7 +73,9 @@ export default function OrderForm() {
           <ul className="divide-y divide-gray-200">
             {orden.map((p, i) => (
               <li key={i} className="flex justify-between items-center py-2">
-                <span className="w-1/2">{p.name} - {p.quantity} - Q{(p.price * p.quantity)}</span>
+                <span className="w-1/2">
+                  {p.name} - {p.quantity} - Q{p.price * p.quantity}
+                </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => decrementar(id as string, p)}
@@ -93,7 +100,9 @@ export default function OrderForm() {
               </li>
             ))}
           </ul>
-          <div className="text-right font-bold">Total actual: Q{totalOrdenActual}</div>
+          <div className="text-right font-bold">
+            Total actual: Q{totalOrdenActual}
+          </div>
         </div>
       )}
 
@@ -106,14 +115,16 @@ export default function OrderForm() {
               <ul className="text-sm text-gray-700">
                 {pedido.items.map((item, i) => (
                   <li key={i}>
-                    {item.name} x {item.quantity} - Q{item.price * item.quantity}
+                    {item.name} x {item.quantity} - Q
+                    {item.price * item.quantity}
                   </li>
                 ))}
               </ul>
-              <div className="text-right font-semibold">Total: Q{pedido.total}</div>
+              <div className="text-right font-semibold">
+                Total: Q{pedido.total}
+              </div>
             </div>
           ))}
-
           <div className="text-right font-bold text-lg border-t border-gray-300 pt-3">
             Total global pedidos: Q{totalPedidos}
           </div>
@@ -126,8 +137,8 @@ export default function OrderForm() {
           disabled={orden.length === 0}
           className={`px-4 py-2 rounded-xl font-semibold ${
             orden.length === 0
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-green-500 text-white hover:bg-green-600'
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-green-500 text-white hover:bg-green-600"
           }`}
         >
           Enviar Orden
@@ -148,7 +159,6 @@ export default function OrderForm() {
         </button>
       </div>
 
-      {/* Botón adicional para regresar al menú principal */}
       <div className="pt-6">
         <button
           onClick={handleVolver}

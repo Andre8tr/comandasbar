@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const tableStatusColors = {
-  pending: 'bg-red-400',
-  inProgress: 'bg-yellow-300',
-  completed: 'bg-green-400',
+  pending: "bg-red-400",
+  inProgress: "bg-yellow-300",
+  completed: "bg-green-400",
 };
 
 const tables = Array.from({ length: 9 }, (_, i) => ({
   id: i + 1,
-  status: 'pending',
+  status: "pending",
 }));
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
             tableStatusColors[table.status as keyof typeof tableStatusColors]
           }`}
         >
-          Mesa {table.id}
+          {table.id}
         </div>
       ))}
     </div>
