@@ -5,7 +5,6 @@ import { db } from "./firebase";
 import {
   doc,
   setDoc,
-  getDoc,
   onSnapshot,
   updateDoc,
   deleteField,
@@ -32,6 +31,7 @@ interface OrdenItem {
 interface Pedido {
   items: OrdenItem[];
   total: number;
+  nota?: string;
 }
 
 interface Mesa {
@@ -49,7 +49,7 @@ interface MesaState {
   quitarProducto: (id: string, producto: Producto) => void;
   incrementar: (id: string, producto: Producto) => void;
   decrementar: (id: string, producto: Producto) => void;
-  enviarOrden: (id: string) => Promise<void>;
+  enviarOrden: (id: string, nota?: string) => Promise<void>;
   limpiarOrden: (id: string) => void;
   completarMesa: (id: string) => void;
   syncMesasWithFirestore: () => void;
@@ -170,10 +170,10 @@ export const useMesaStore = create<MesaState>((set, get) => ({
     }));
   },
 
-  enviarOrden: async (id) => {
+  enviarOrden: async (id, nota) => {
     const actual = get().ordenActual[id] || [];
     const total = actual.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    const nuevoPedido = { items: actual, total };
+    const nuevoPedido = { items: actual, total, nota };
     const previos = get().ordenes[id] || [];
 
     const nuevosPedidos = [...previos, nuevoPedido];
@@ -187,7 +187,6 @@ export const useMesaStore = create<MesaState>((set, get) => ({
       ),
     }));
 
-    // Guardar en Firestore
     const docRef = doc(db, "mesas", id);
     await setDoc(docRef, {
       pedidos: nuevosPedidos,
@@ -209,7 +208,6 @@ export const useMesaStore = create<MesaState>((set, get) => ({
       ),
     }));
 
-    // Borrar historial en Firestore
     const docRef = doc(db, "mesas", id);
     updateDoc(docRef, {
       pedidos: deleteField(),

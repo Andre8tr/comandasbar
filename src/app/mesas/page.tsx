@@ -25,7 +25,7 @@ export default function MesasDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 grid grid-cols-3 gap-4">
+    <div className="min-h-screen bg-gray-50 p-6 grid grid-cols-3  gap-4">
       {mesas.map((mesa) => (
         <Link
           key={mesa.id}
@@ -34,7 +34,6 @@ export default function MesasDashboard() {
             mesa.estado
           )} text-white font-semibold shadow-md transition hover:scale-105 h-32 flex flex-col items-center justify-center`}
         >
-          {/* Ícono bonito de mesa */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="w-6 h-6 text-white mb-1"

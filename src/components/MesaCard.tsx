@@ -16,7 +16,7 @@ export default function MesaCard({
   return (
     <Link href={`/mesas/${mesa.id}`}>
       <div
-        className={`rounded-xl p-2 text-white text-center text-xl font-bold ${
+        className={`rounded-xl p-4 text-white text-center text-xl font-bold ${
           statusColors[mesa.status]
         }`}
       >
