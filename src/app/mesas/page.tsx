@@ -9,7 +9,7 @@ export default function MesasDashboard() {
 
   useEffect(() => {
     syncMesasWithFirestore();
-  }, []);
+  }, [syncMesasWithFirestore]);
 
   const getColorClass = (estado: string) => {
     switch (estado) {
