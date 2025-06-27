@@ -7,7 +7,6 @@ import { useState } from "react";
 export default function OrderForm() {
   const { id } = useParams();
   const router = useRouter();
-
   const {
     productos,
     ordenActual,
@@ -46,6 +45,23 @@ export default function OrderForm() {
     router.push("/mesas");
   };
 
+  const handlePrint = async () => {
+    const html2pdf = (await import("html2pdf.js")).default;
+
+    const element = document.getElementById("print-section");
+    if (element) {
+      html2pdf()
+        .from(element)
+        .set({
+          margin: 5,
+          filename: `mesa-${id}-cuenta.pdf`,
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a7", orientation: "portrait" },
+        })
+        .save();
+    }
+  };
+
   return (
     <div className="min-h-screen p-4 bg-gray-50 sm:flex sm:space-x-6">
       {/* Productos */}
@@ -72,6 +88,7 @@ export default function OrderForm() {
 
       {/* Orden actual y pedidos anteriores */}
       <div className="w-full sm:max-w-sm space-y-6 mt-6 sm:mt-2">
+        {/* Orden actual */}
         {orden.length > 0 && (
           <div className="bg-white p-4 rounded-xl shadow space-y-4 mt-4">
             <h3 className="text-md font-bold">Orden actual:</h3>
@@ -122,13 +139,18 @@ export default function OrderForm() {
           </div>
         )}
 
+        {/* Pedidos anteriores */}
         {pedidos.length > 0 && (
           <div className="bg-white p-4 rounded-xl shadow space-y-4">
             <h3 className="text-md font-bold">Pedidos anteriores:</h3>
+            {/* Contenido visible */}
             {pedidos.map((pedido, idx) => (
-              <div key={idx} className="space-y-2">
+              <div
+                key={idx}
+                className="space-y-1 text-sm text-gray-700 border-b pb-2"
+              >
                 <h4 className="font-semibold">Pedido {idx + 1}:</h4>
-                <ul className="text-sm text-gray-700">
+                <ul>
                   {pedido.items.map((item, i) => (
                     <li key={i}>
                       {item.name} x {item.quantity} - Q
@@ -137,21 +159,44 @@ export default function OrderForm() {
                   ))}
                 </ul>
                 {pedido.nota && (
-                  <p className="text-sm italic text-red-500">
-                    Nota: {pedido.nota}
-                  </p>
+                  <p className="italic text-red-500">Nota: {pedido.nota}</p>
                 )}
                 <div className="text-right font-semibold">
                   Total: Q{pedido.total}
                 </div>
               </div>
             ))}
-            <div className="text-right font-bold text-lg border-t border-gray-300 pt-3">
+            <div className="text-right font-bold text-base pt-2">
               Total global pedidos: Q{totalPedidos}
+            </div>
+
+            {/* Contenido oculto para imprimir */}
+            <div id="print-section" className="hidden">
+              <div>
+                <h2>Cuenta - Mesa {id}</h2>
+                {pedidos.map((pedido, idx) => (
+                  <div key={idx}>
+                    <h3>Pedido {idx + 1}</h3>
+                    <ul>
+                      {pedido.items.map((item, i) => (
+                        <li key={i}>
+                          {item.name} x {item.quantity} = Q
+                          {item.price * item.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                    {pedido.nota && <p>Nota: {pedido.nota}</p>}
+                    <p>Total: Q{pedido.total}</p>
+                    <hr />
+                  </div>
+                ))}
+                <h3>Total global: Q{totalPedidos}</h3>
+              </div>
             </div>
           </div>
         )}
 
+        {/* Botones */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between mt-6 py-6">
           <button
             onClick={handleEnviar}
@@ -179,6 +224,16 @@ export default function OrderForm() {
             Orden Completada
           </button>
         </div>
+
+        {/* Botón imprimir */}
+        {pedidos.length > 0 && (
+          <button
+            onClick={handlePrint}
+            className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 font-semibold"
+          >
+            🖨️ Imprimir Cuenta
+          </button>
+        )}
 
         <div className="pt-6">
           <button

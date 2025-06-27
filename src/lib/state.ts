@@ -73,8 +73,9 @@ export const useMesaStore = create<MesaState>((set, get) => ({
         { name: "Gallo Botella", price: 15 },
         { name: "Cabro Reserva Botella", price: 20 },
         { name: "Corona Botella", price: 15 },
-        { name: "Gallo Litro", price: 30 },
-        { name: "Cabro Litro", price: 30 },
+        { name: "Gallo Litro", price: 35 },
+        { name: "Cabro Litro", price: 35 },
+        { name: "Oferta Litros", price: 60 },
       ],
     },
     {
