@@ -9,7 +9,7 @@ export default function MesasDashboard() {
 
   useEffect(() => {
     syncMesasWithFirestore();
-  }, [syncMesasWithFirestore]);
+  }, []);
 
   const getColorClass = (estado: string) => {
     switch (estado) {
@@ -19,13 +19,15 @@ export default function MesasDashboard() {
         return "bg-yellow-300";
       case "verde":
         return "bg-green-400";
+      case "despachado":
+        return "bg-blue-400"; // 👈 Aquí mapea correctamente "despachado"
       default:
         return "bg-gray-300";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 grid grid-cols-3  gap-4">
+    <div className="min-h-screen bg-gray-50 p-6 grid grid-cols-3 gap-4">
       {mesas.map((mesa) => (
         <Link
           key={mesa.id}

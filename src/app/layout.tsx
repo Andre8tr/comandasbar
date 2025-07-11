@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-gray-100 text-gray-900">
+      <body className="bg-black text-white">
         <header className="bg-white shadow p-4">
           <h1 className="text-xl font-bold text-center">
             Comandas Sportbar 1611

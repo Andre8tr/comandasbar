@@ -2,11 +2,12 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useMesaStore } from "@/lib/state";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function OrderForm() {
   const { id } = useParams();
   const router = useRouter();
+
   const {
     productos,
     ordenActual,
@@ -18,7 +19,13 @@ export default function OrderForm() {
     limpiarOrden,
     enviarOrden,
     completarMesa,
+    setEstadoMesa,
   } = useMesaStore();
+
+  type Producto = {
+    name: string;
+    price: number;
+  };
 
   const orden = ordenActual[id as string] || [];
   const pedidos = ordenes[id as string] || [];
@@ -30,6 +37,20 @@ export default function OrderForm() {
   const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
 
   const [nota, setNota] = useState("");
+  const clickAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playClickSound = () => {
+    if (!clickAudioRef.current) {
+      clickAudioRef.current = new Audio("/click.mp3");
+    }
+    clickAudioRef.current.currentTime = 0;
+    clickAudioRef.current.play();
+  };
+
+  const handleAgregar = (item: Producto) => {
+    agregarProducto(id as string, item);
+    playClickSound();
+  };
 
   const handleEnviar = async () => {
     await enviarOrden(id as string, nota);
@@ -41,25 +62,13 @@ export default function OrderForm() {
     router.push("/mesas");
   };
 
-  const handleVolver = () => {
+  const handleDespachado = async () => {
+    await setEstadoMesa(id as string, "despachado");
     router.push("/mesas");
   };
 
-  const handlePrint = async () => {
-    const html2pdf = (await import("html2pdf.js")).default;
-
-    const element = document.getElementById("print-section");
-    if (element) {
-      html2pdf()
-        .from(element)
-        .set({
-          margin: 5,
-          filename: `mesa-${id}-cuenta.pdf`,
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "mm", format: "a7", orientation: "portrait" },
-        })
-        .save();
-    }
+  const handleVolver = () => {
+    router.push("/mesas");
   };
 
   return (
@@ -75,8 +84,8 @@ export default function OrderForm() {
               {cat.items.map((item) => (
                 <button
                   key={item.name}
-                  onClick={() => agregarProducto(id as string, item)}
-                  className="bg-blue-200 text-blue-800 hover:bg-blue-300 px-2 py-2 rounded-xl transition-colors"
+                  onClick={() => handleAgregar(item)}
+                  className="bg-blue-200 text-blue-800 hover:bg-blue-300 active:bg-blue-400 px-2 py-2 rounded-xl transition-colors"
                 >
                   {item.name} - Q{item.price}
                 </button>
@@ -96,7 +105,7 @@ export default function OrderForm() {
               {orden.map((p, i) => (
                 <li key={i} className="flex justify-between items-center py-2">
                   <span className="w-1/2">
-                    {p.name} - {p.quantity} - Q{p.price * p.quantity}
+                    {p.quantity} {p.name} - Q{p.price * p.quantity}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
@@ -143,7 +152,6 @@ export default function OrderForm() {
         {pedidos.length > 0 && (
           <div className="bg-white p-4 rounded-xl shadow space-y-4">
             <h3 className="text-md font-bold">Pedidos anteriores:</h3>
-            {/* Contenido visible */}
             {pedidos.map((pedido, idx) => (
               <div
                 key={idx}
@@ -169,35 +177,11 @@ export default function OrderForm() {
             <div className="text-right font-bold text-base pt-2">
               Total global pedidos: Q{totalPedidos}
             </div>
-
-            {/* Contenido oculto para imprimir */}
-            <div id="print-section" className="hidden">
-              <div>
-                <h2>Cuenta - Mesa {id}</h2>
-                {pedidos.map((pedido, idx) => (
-                  <div key={idx}>
-                    <h3>Pedido {idx + 1}</h3>
-                    <ul>
-                      {pedido.items.map((item, i) => (
-                        <li key={i}>
-                          {item.name} x {item.quantity} = Q
-                          {item.price * item.quantity}
-                        </li>
-                      ))}
-                    </ul>
-                    {pedido.nota && <p>Nota: {pedido.nota}</p>}
-                    <p>Total: Q{pedido.total}</p>
-                    <hr />
-                  </div>
-                ))}
-                <h3>Total global: Q{totalPedidos}</h3>
-              </div>
-            </div>
           </div>
         )}
 
         {/* Botones */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between mt-6 py-6">
+        <div className="grid grid-cols-2 gap-4 mt-6 py-6">
           <button
             onClick={handleEnviar}
             disabled={orden.length === 0}
@@ -223,17 +207,14 @@ export default function OrderForm() {
           >
             Orden Completada
           </button>
-        </div>
 
-        {/* Botón imprimir */}
-        {pedidos.length > 0 && (
           <button
-            onClick={handlePrint}
-            className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-xl hover:bg-gray-800 font-semibold"
+            onClick={handleDespachado}
+            className="px-4 py-2 bg-blue-400 text-white hover:bg-blue-500 rounded-xl font-semibold"
           >
-            🖨️ Imprimir Cuenta
+            Despachado
           </button>
-        )}
+        </div>
 
         <div className="pt-6">
           <button
