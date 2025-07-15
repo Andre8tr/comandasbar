@@ -86,47 +86,86 @@ export const useMesaStore = create<MesaState>((set, get) => {
       {
         name: "Cervezas 🍺",
         items: [
-          { name: "Gallo Botella", price: 15 },
-          { name: "Cabro Reserva Botella", price: 20 },
-          { name: "Corona Botella", price: 15 },
           { name: "Gallo Litro", price: 35 },
           { name: "Cabro Litro", price: 35 },
           { name: "Oferta Litros", price: 60 },
+          { name: "Gallo Botella", price: 18 },
+          { name: "Cabro Botella", price: 18 },
+          { name: "Cabro Reserva Botella", price: 25 },
+          { name: "Corona Botella", price: 15 },
+          { name: "Monte Carlo Botella", price: 15 },
         ],
       },
       {
         name: "Tragos Preparados 🍹",
         items: [
-          { name: "Cuba Libre", price: 25 },
-          { name: "Jagger Fresh", price: 30 },
+          { name: "Jagger Soda", price: 30 },
           { name: "Jagger Bomb", price: 35 },
-          { name: "Whisky", price: 20 },
-          { name: "Ron", price: 20 },
           { name: "Bloody Mary", price: 30 },
+          { name: "Caipirinha", price: 25 },
+          { name: "Mojito", price: 30 },
+          { name: "Cuba Libre", price: 20 },
+          { name: "Quetalteca Sabor", price: 16 },
+          { name: "Shot Tequila Jimador", price: 10 },
+
+          { name: "Quetzalteca Tinaja (8U - 3Aguas)", price: 130 },
+          { name: "Michelada", price: 35 },
+          { name: "Gaseosas", price: 10 },
           { name: "Charro Negro", price: 25 },
-        ],
-      },
-      {
-        name: "Bebidas 🥤",
-        items: [
-          { name: "Cimarrona", price: 25 },
-          { name: "Jugo V8 preparado", price: 25 },
+          { name: "Cimarrona", price: 20 },
+          { name: "Jugo Vegetales Preparado", price: 25 },
           { name: "Agua Pura", price: 5 },
-          { name: "Coca-Cola", price: 10 },
-          { name: "Sprite", price: 10 },
-          { name: "Mineral", price: 10 },
+          { name: "Whisky E. Roja", price: 25 },
         ],
       },
       {
         name: "Comida 🍔",
         items: [
-          { name: "Nachos Preparados", price: 30 },
           { name: "Papas Fritas", price: 15 },
           { name: "Papas Especiales", price: 15 },
+          { name: "Nachos Preparados", price: 30 },
           { name: "Tostadas", price: 20 },
-          { name: "Pizza Dog", price: 25 },
           { name: "Alitas 6/u", price: 35 },
           { name: "Alitas 10/u", price: 50 },
+          { name: "Sandwich Jamón y Queso", price: 25 },
+          { name: "Derretido", price: 25 },
+          { name: "Pizza Dog", price: 25 },
+          { name: "Hamburguesa", price: 25 },
+        ],
+      },
+      {
+        name: "Botellas Ron 🥃",
+        items: [
+          { name: "Ron Bacardi", price: 170 },
+          { name: "Ron Botran 12 años", price: 225 },
+          { name: "Pulmon Quetzalteca", price: 160 },
+          { name: "Ron XL", price: 210 },
+          { name: "Venado Especial", price: 120 },
+        ],
+      },
+      {
+        name: "Botellas Tequila 🔥",
+        items: [
+          { name: "El Jimador Blanco", price: 250 },
+          { name: "Jose Cuervo Reposado", price: 300 },
+          { name: "Don Julio", price: 950 },
+          { name: "1800 Cristalino", price: 525 },
+        ],
+      },
+      {
+        name: "Botellas Whisky 🥃",
+        items: [
+          { name: "Johnnie Walker E. Roja", price: 350 },
+          { name: "Johnnie Walker E. Negra", price: 700 },
+          { name: "Old Parr", price: 600 },
+          { name: "Jack Daniels", price: 600 },
+        ],
+      },
+      {
+        name: "Botellas Varias 🍸",
+        items: [
+          { name: "Vodka Finlandia", price: 350 },
+          { name: "Jägermeister", price: 580 },
         ],
       },
       {
@@ -134,6 +173,7 @@ export const useMesaStore = create<MesaState>((set, get) => {
         items: [
           { name: "Cigarros 3u", price: 10 },
           { name: "Vaso quebrado", price: 25 },
+          { name: "Descorche de botella", price: 100 }, // ← añadido
         ],
       },
     ],

@@ -30,10 +30,20 @@ export default function OrderForm() {
   const orden = ordenActual[id as string] || [];
   const pedidos = ordenes[id as string] || [];
 
-  const totalOrdenActual = orden.reduce(
-    (sum, p) => sum + p.price * p.quantity,
-    0
-  );
+  // Lógica especial para litros
+  const litrosNombres = ["Cabro Litro", "Gallo Litro"];
+
+  const litros = orden.filter((p) => litrosNombres.includes(p.name));
+  const otros = orden.filter((p) => !litrosNombres.includes(p.name));
+
+  const totalLitros = litros.reduce((sum, p) => sum + p.quantity, 0);
+  const pares = Math.floor(totalLitros / 2);
+  const sobrantes = totalLitros % 2;
+
+  const totalLitrosConOferta = pares * 60 + sobrantes * 35;
+  const totalOtros = otros.reduce((sum, p) => sum + p.price * p.quantity, 0);
+  const totalOrdenActual = totalLitrosConOferta + totalOtros;
+
   const totalPedidos = pedidos.reduce((sum, p) => sum + p.total, 0);
 
   const [nota, setNota] = useState("");
